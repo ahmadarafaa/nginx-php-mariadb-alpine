@@ -1,0 +1,36 @@
+version: "3.4"
+
+services:
+        web:
+                build: .
+                image: nginx-fpm-wordpress-alpine
+                container_name: nginx_wordpress
+                depends_on:
+                        - database
+                volumes:
+                        - app/:/var/www/html/
+                env_file:
+                        - conf/db.env
+                ports:
+                        - "8080:80"
+                networks:
+                        - wp-network
+        database:
+                image: mariadb
+                container_name: wordpress_db
+                volumes:
+                        - ./mysql:/var/lib/mysql
+                        - ./conf/.my.cnf:/root/.my.cnf
+                restart: always
+                command: '--default-authentication-plugin=mysql_native_password'
+                networks:
+                        - wp-network
+                env_file:
+                        - conf/db.env 
+                        
+networks:
+        wp-network:
+                driver: bridge
+
+volumes:
+        app:
